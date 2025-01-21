@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { set, useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 
 const Input = ( { register, errors, id, labelText, type, rules }) => {
   return (
@@ -27,30 +27,21 @@ const MoneyInput = ( { register, errors, id, labelText, rules }) => {
 };
 
 const ProductInfoForm = ({ formType, tempProduct, addProduct, editProduct, closeModal}) => {
-  const {register, handleSubmit, reset, setValue, formState: { errors }, watch} = useForm({
+  const {register, handleSubmit, control, reset, setValue, formState: { errors }, clearErrors, watch} = useForm({
+    mode: "onTouched",
     defaultValues: {
-      category: null,
-      content: null,
-      description: null,
-      imageUrl: null,
-      imagesUrl: [],
-      is_enabled: 0,
-      num: null,
-      origin_price: null,
-      price: null,
-      title: null,
-      unit: null,
-    },
-    mode: "onTouched"
+      imagesUrl: [{url:""}]
+    }
   });
   
   useEffect(()=>{
-    if (formType === "edit"){
+    clearErrors();
+    if (formType === "edit" && tempProduct !== null){
       setValue(`category`, tempProduct.category)
       setValue(`content`, tempProduct.content)
       setValue(`description`, tempProduct.description)
       setValue(`imageUrl`, tempProduct.imageUrl)
-      setValue(`imagesUrl`, tempProduct.imagesUrl)
+      setValue(`imagesUrl`, tempProduct.imagesUrl.map((url)=> {return ({"url":`${url}`})}))
       setValue(`is_enabled`, tempProduct.is_enabled)
       setValue(`num`, tempProduct.num)
       setValue(`origin_price`, tempProduct.origin_price)
@@ -62,7 +53,7 @@ const ProductInfoForm = ({ formType, tempProduct, addProduct, editProduct, close
       setValue(`content`, null)
       setValue(`description`, null)
       setValue(`imageUrl`, null)
-      setValue(`imagesUrl`, [])
+      setValue(`imagesUrl`, [{url:""}])
       setValue(`is_enabled`, null)
       setValue(`num`, null)
       setValue(`origin_price`, null)
@@ -76,6 +67,7 @@ const ProductInfoForm = ({ formType, tempProduct, addProduct, editProduct, close
     data.origin_price = Number(data.origin_price);
     data.price = Number(data.price);
     data.is_enabled = Number(data.is_enabled);
+    data.imagesUrl = data.imagesUrl.map((obj) => {return (obj.url)});
     const productInfo = { "data": data };
     if (formType === "add"){
       addProduct(productInfo);
@@ -96,6 +88,10 @@ const ProductInfoForm = ({ formType, tempProduct, addProduct, editProduct, close
     }
   },[isSubmitSuccessful])
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "imagesUrl"
+  });
   return (
     <>
       <div className="modal-dialog">
@@ -207,6 +203,16 @@ const ProductInfoForm = ({ formType, tempProduct, addProduct, editProduct, close
                     message: "主圖網址為必填",
                   }
                 }}></Input>
+              </div>
+              <div className="mb-4 text-start">
+                <label htmlFor={`imagesUrl`} className="form-label">更多圖片</label>
+                {fields.map((item, index) => (
+                  <div key={item.id} className='input-group input-group-sm mb-2'>
+                    <input type="url" className="form-control" {...register(`imagesUrl.${index}.url`)} />
+                    <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => remove(index)}>Delete</button>
+                  </div>
+                ))}
+                <button type="button" className="btn btn-sm btn-outline-primary rounded-0" onClick={() => append({})}>新增更多圖片</button>
               </div>
               <div className="mb-4 form-check">
                 <input type="checkbox" className={`form-check-input`} id="is_enabled"
