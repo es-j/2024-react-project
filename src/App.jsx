@@ -1,10 +1,12 @@
-import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
+import { useEffect, useState, useRef } from 'react'
 import { set, useForm } from 'react-hook-form'
 
 import { Modal } from 'bootstrap'
 
-import ProductInfoForm from './ProductInfoForm.jsx'
+import ProductInfoForm from './component/ProductInfoForm.jsx'
+import Pagination from './component/Pagination.jsx'
+import Loading from './component/Loading.jsx'
 
 const api_base = "https://ec-course-api.hexschool.io/v2";
 const api_path = "esgrace";
@@ -12,6 +14,7 @@ const api_path = "esgrace";
 function App() {
   const [products, setProducts] = useState([]);
   const [tempProduct, setTempProduct] = useState(null);
+  const [pagination, setPagination] = useState({});
 
   const {register, handleSubmit, formState: { errors }} = useForm({mode: "onTouched"});
   const onSubmit = (data) => signIn(data);
@@ -30,12 +33,6 @@ function App() {
 
   const checkIfSignedIn = async () => {
     try {
-      const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-      if (!token) {
-        setIsAuthorized(false);
-        return;
-      }
-      axios.defaults.headers.common['Authorization'] = token;
       const response = await axios.post(`${api_base}/api/user/check`);
       setIsAuthorized(true);
       getProducts();
@@ -45,21 +42,20 @@ function App() {
   };
 
   useEffect(() => {
+    const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    if (!token) {
+      setIsAuthorized(false);
+      return;
+    }
+    axios.defaults.headers.common['Authorization'] = token;
     checkIfSignedIn();
   },[]);
 
-  const getProducts = async () => {
+  const getProducts = async (page = pagination.current_page, category = "") => {
     try {
-      const res = await axios.get(`${api_base}/api/${api_path}/admin/products/all`);
-      let productsList = []; 
-      Object.keys(res.data.products).map((id) => {
-        const product = {
-          ...res.data.products[id], 
-          "id" : id
-        };
-        productsList.push(product);
-      })
-      setProducts(productsList);
+      const res = await axios.get(`${api_base}/api/${api_path}/admin/products?page=${page}&category=${category}`);
+      setProducts(res.data.products);
+      setPagination(res.data.pagination);
     } catch (error) {
       console.log(error.response.data.message);
     }
@@ -106,7 +102,7 @@ function App() {
   const deleteProduct = async (id) => {
     try {
       const res = await axios.delete(`${api_base}/api/${api_path}/admin/product/${id}`);
-      setProducts(products.filter((product) => product.id !== id));
+      getProducts(); // because the pagination data may change
       setTempProduct(null);
     } catch (error) {
       console.log(error.response.data.message);
@@ -119,7 +115,7 @@ function App() {
     if (modalRef.current !== null){
       customModal.current = new Modal(modalRef.current);
     }
-  });
+  },[modalRef.current]);
   
   const openModal = () => {
     customModal.current.show();
@@ -182,6 +178,7 @@ function App() {
                     )}
                   </tbody>
                 </table>
+                <Pagination pagination={pagination} getProducts={getProducts}></Pagination>
               </div>
               <div className="col-lg-6">
                 <h3 className='mb-4'>產品資訊</h3>
@@ -208,7 +205,7 @@ function App() {
                       <div className='d-flex flex-wrap'>
                         {tempProduct.imagesUrl?.map((url, index) => {
                           return(
-                            <img key={index} src={url} className="images my-1" />
+                            <img key={index} src={url} className="images my-1 me-2" />
                           )
                         })}
                       </div>
@@ -262,7 +259,6 @@ function App() {
           </div>
         </div>
       )}
-
     </>
   )
 }
