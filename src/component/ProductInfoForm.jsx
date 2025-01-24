@@ -41,7 +41,7 @@ const ProductInfoForm = ({ formType, tempProduct, addProduct, editProduct, close
       setValue(`content`, tempProduct.content)
       setValue(`description`, tempProduct.description)
       setValue(`imageUrl`, tempProduct.imageUrl)
-      setValue(`imagesUrl`, tempProduct.imagesUrl.map((url)=> {return ({"url":`${url}`})}))
+      setValue(`imagesUrl`, tempProduct.imagesUrl.map((url) => {return ({"url":`${url}`})}))
       setValue(`is_enabled`, tempProduct.is_enabled)
       setValue(`num`, tempProduct.num)
       setValue(`origin_price`, tempProduct.origin_price)

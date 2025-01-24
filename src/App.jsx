@@ -19,8 +19,10 @@ function App() {
   const {register, handleSubmit, formState: { errors }} = useForm({mode: "onTouched"});
   const onSubmit = (data) => signIn(data);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const signIn = async (data) => {
+    setIsLoading(true);
     try {
       const response = await axios.post(`${api_base}/admin/signin`, data);
       const { token, expired } = response.data;
@@ -29,6 +31,7 @@ function App() {
     } catch (error) {
       alert(error.response.data.message);
     }
+    setIsLoading(false);
   };
 
   const checkIfSignedIn = async () => {
@@ -52,6 +55,7 @@ function App() {
   },[]);
 
   const getProducts = async (page = pagination.current_page, category = "") => {
+    setIsLoading(true);
     try {
       const res = await axios.get(`${api_base}/api/${api_path}/admin/products?page=${page}&category=${category}`);
       setProducts(res.data.products);
@@ -59,9 +63,11 @@ function App() {
     } catch (error) {
       console.log(error.response.data.message);
     }
+    setIsLoading(false);
   };
 
   const signOut = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.post(`${api_base}/logout`);
       setIsAuthorized(false);
@@ -69,20 +75,24 @@ function App() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   }
 
   const [formType, setFormType] = useState("add");
 
   const addProduct = async (addProductInfo) => {
+    setIsLoading(true);
     try {
       const res = await axios.post(`${api_base}/api/${api_path}/admin/product`, addProductInfo);
       getProducts(); // because the assigned id is unknown
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   }
 
   const editProduct = async (id, editProductInfo) => {
+    setIsLoading(true);
     try {
       const res = await axios.put(`${api_base}/api/${api_path}/admin/product/${id}`, editProductInfo);
       const productsList = products.map(product => {
@@ -97,9 +107,11 @@ function App() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   }
 
   const deleteProduct = async (id) => {
+    setIsLoading(true);
     try {
       const res = await axios.delete(`${api_base}/api/${api_path}/admin/product/${id}`);
       getProducts(); // because the pagination data may change
@@ -107,13 +119,17 @@ function App() {
     } catch (error) {
       console.log(error.response.data.message);
     }
+    setIsLoading(false);
   }
 
   const modalRef = useRef(null);
   const customModal = useRef(null);
   useEffect(() => {
     if (modalRef.current !== null){
-      customModal.current = new Modal(modalRef.current);
+      customModal.current = new Modal(modalRef.current, {
+        backdrop: "static",
+        keyboard: false,
+      })
     }
   },[modalRef.current]);
   
@@ -220,9 +236,11 @@ function App() {
           <div ref={modalRef} className="modal fade" id="productInfoFormModal" tabIndex="-1">
             <ProductInfoForm tempProduct={tempProduct} formType={formType} addProduct={addProduct} editProduct={editProduct} closeModal={closeModal}></ProductInfoForm>
           </div>
+          <Loading type={"spinningBubbles"} color={"#6c757d"} className={`position-absolute top-50 start-50 translate-middle ${isLoading ? "d-flex" : "d-none"}`}></Loading>
         </>
       ) : (
         <div className="sign-in vh-100 container d-flex flex-column justify-content-center">
+          <Loading type={"spinningBubbles"} color={"#6c757d"} className={`position-absolute top-50 start-50 translate-middle ${isLoading ? "d-flex" : "d-none"}`}></Loading>
           <div className="row justify-content-center">
             <div className="col-8 col-md-4">
               <h3 className='mb-6'>登入 Sign In</h3>
