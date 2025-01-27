@@ -11,3 +11,16 @@ img{
 .images{
     max-height: 100px;
 }
+
+.modal-carousel-item-img{
+    height: 250px;
+}
+
+.product-list-card{
+    text-decoration: none;
+    transition: transform 0.5s, box-shadow 0.5s;
+}
+.product-list-card:hover {
+    transform: translateY(5px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.16);
+}
