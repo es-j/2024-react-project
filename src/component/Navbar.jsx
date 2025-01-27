@@ -8,10 +8,10 @@ export default function Navbar(){
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link" to="/">Cart</Link>
+                <Link className="nav-link" to="/2024-react-project/">Cart</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/admin">Admin</Link>
+                <Link className="nav-link" to="/2024-react-project/admin">Admin</Link>
               </li>
             </ul>
           </div>
