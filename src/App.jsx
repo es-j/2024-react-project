@@ -1,19 +1,13 @@
-import { Routes, Route } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import Navbar from './component/NavBar.jsx'
-import Cart from './pages/Cart.jsx'
-import Admin from './pages/Admin.jsx'
 
 function App() {
   return (
     <>
       <Navbar></Navbar>
       <div className="container">
-        <Routes>
-          <Route path='/2024-react-project/' element={<Cart />}></Route>
-          <Route path='/2024-react-project/admin' element={<Admin />}></Route>
-        </Routes>
+        <Outlet />
       </div>
-      {/*<Loading type={"spinningBubbles"} color={"#6c757d"} className={`position-absolute top-50 start-50 translate-middle ${isLoading ? "d-flex" : "d-none"}`}></Loading>*/}
     </>
   )
 }
